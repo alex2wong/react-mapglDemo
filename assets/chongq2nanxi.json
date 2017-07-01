@@ -1,0 +1,27 @@
+{"status":"1","data":{
+    "province":"四川省",
+    "cross_list":[
+        {"distance":"1235.01","direction":"East","name":"118乡道--板牛路","weight":"-10","level":"53000, 45000","longitude":"104.8143772","crossid":"0813H48F0340232--0813H48F0340239","width":"4, 4","latitude":"29.21248361"},
+        {"distance":"2318.37","direction":"SouthEast","name":"王贡路--板牛路","weight":"-120","level":"45000, 45000","longitude":"104.8172147","crossid":"0813H48F0340236--0813H48F0340239","width":"8, 4","latitude":"29.22791972"},
+        {"distance":"2362.1","direction":"SouthWest","name":"民主路--王贡路","weight":"-120","level":"45000, 45000","longitude":"104.8376414","crossid":"0813H48F03402322--0813H48F0340236","width":"4, 8","latitude":"29.22744639"}
+        ],
+    "code":"1","tel":"0813","cityadcode":"510300","areacode":"0813","timestamp":"1498888242.39","sea_area":{"adcode":"","name":""},
+    "pos":"在回龙村附近, 在118乡道旁边, 靠近118乡道--板牛路路口",
+    "road_list":[
+        {"distance":"351","direction":"North","name":"118乡道","level":"6","longitude":"104.827","width":"4","roadid":"0813H48F0340232","latitude":"29.2056"},
+        {"distance":"1233.4","direction":"East","name":"板牛路","level":"45000","longitude":"104.814","width":"4","roadid":"0813H48F0340239","latitude":"29.2126"},
+        {"distance":"1465.14","direction":"SouthWest","name":"幸福路","level":"45000","longitude":"104.837","width":"4","roadid":"0813H48F03402319","latitude":"29.2183"}
+        ],
+    "result":"true",
+    "message":"Successful.",
+    "desc":"四川省,自贡市,沿滩区",
+    "city":"自贡市","districtadcode":"510311","district":"沿滩区","country":"中国","provinceadcode":"510000","version":"2.0-3.0.7180.1630","adcode":"510311",
+    "poi_list":[
+        {"distance":"214","direction":"West","tel":"","name":"回龙村","weight":"0.0","typecode":"190108","longitude":"104.824151","address":"沿滩区","latitude":"29.208239","type":"地名地址信息;普通地名;村庄级地名","poiid":"B032D0MKQB"},
+        {"distance":"392.752","direction":"West","tel":"","name":"回龙村八组","weight":"0","typecode":"190109","longitude":"104.822520","address":"沿滩区","latitude":"29.209865","type":"地名地址信息;普通地名;村组级地名","poiid":"B0FFHCWQP4"},
+        {"distance":"583.336","direction":"South","tel":"","name":"金柚山庄","weight":"0.114118","typecode":"170400","longitude":"104.826754","address":"118乡道南200米","latitude":"29.203412","type":"公司企业;农林牧渔基地;其它农林牧渔基地","poiid":"B0FFGCDFHU"},
+        {"distance":"712.88","direction":"NorthEast","tel":"","name":"沱头","weight":"0.153044","typecode":"190108","longitude":"104.832102","address":"沿滩区","latitude":"29.212594","type":"地名地址信息;普通地名;村庄级地名","poiid":"B032D0MKTF"},
+        {"distance":"775.97","direction":"North","tel":"","name":"白鹤林","weight":"0.264082","typecode":"190108","longitude":"104.825015","address":"沿滩区","latitude":"29.215529","type":"地名地址信息;普通地名;村庄级地名","poiid":"B032D0MKOP"}
+    ]
+    }
+}

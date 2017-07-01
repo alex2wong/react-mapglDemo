@@ -7,7 +7,7 @@ const webpack = require('webpack');
 
 const config = {
   entry: {
-    app: resolve('./src/root.js')
+    app: resolve('./src/app.js')
   },
 
   output: {
@@ -36,11 +36,12 @@ const config = {
 
   // Optional: Enables reading mapbox token from environment variable
   plugins: [
-    new webpack.EnvironmentPlugin(['MapboxAccessToken'])
+    // new webpack.EnvironmentPlugin(['MapboxAccessToken'])
+    new webpack.EnvironmentPlugin({'MapboxAccessToken': 
+      'pk.eyJ1IjoiaHVhbmd5aXhpdSIsImEiOiI2WjVWR1hFIn0.1P90Q-tkbHS38BvnrhTI6w'})
   ]
 };
 
 // Enables bundling against src in this repo rather than the installed version
 module.exports = env => env && env.local ?
   require('../webpack.config.local')(config)(env) : config;
-  
