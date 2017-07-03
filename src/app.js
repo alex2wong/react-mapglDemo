@@ -45,6 +45,7 @@ export default class App extends Component {
     super(props);
     this.state = {
       history_view: [],
+      viewIndex: 0,
       viewport: {
         latitude: yibin.latitude,
         longitude: yibin.longitude,
@@ -59,17 +60,25 @@ export default class App extends Component {
 
   // register window resize event..
   componentDidMount() {
-    window.addEventListener('resize', this._resize);
+    var that = this;
+    // when registering ,store App Component in `that`, which in a closure.
+    window.addEventListener('resize', function(){
+      that._resize.call(that);
+    });
     this._resize();
   }
 
   componentWillUnmount() {
-    window.removeEventListener('resize', this._resize);
+    let that = this;
+    window.removeEventListener('resize', function(){
+      that._resize.call(that);
+    });
   }
 
   // set Component state when resize..
   _resize() {
     // let oldVP = {};
+
     // Object.assign(oldVP,this.state.viewport);
     this.setState({
       viewport: {
@@ -99,13 +108,51 @@ export default class App extends Component {
         )
   }
 
-  // try to record and navi history viewport..
+  // try to record and navi history viewport..  `this` refer to Object who triggered it..
   navi(v) {
-    // TODO
-    this.state.history_view.push(v);
-    console.log("history_view recorded.."+ this.state.history_view.length);
+    // TODO.. apply strategy to reduce codes..
+    if (v == 0 && this.state.history_view.length > 0 && this.state.viewIndex > 0) {
+      this.state.viewIndex -= 1;
+      this.setState({
+        viewport: Object.assign({}, this.state.history_view[this.state.viewIndex])
+      });
+      console.warn("called parent preView func");
+    } else if (v == 1 && this.state.history_view.length - 1 > this.state.viewIndex ) {
+      this.state.viewIndex += 1;
+      this.setState({
+        viewport: Object.assign({}, this.state.history_view[this.state.viewIndex])
+      });
+      console.warn("called parent nexView func");
+    } else if (v != 0 && v!= 1){
+      this.add2hist(this.state.history_view, this.state.viewport);
+    }
   }
 
+  add2hist(histViews, curView) {
+    let isChanged = this.isViewChanged(histViews, curView);
+    if (isChanged) {
+      histViews.push(curView);
+      // move cursor to recent viewport instance
+      this.state.viewIndex = histViews.length - 1;
+      console.log("history_view recorded.."+ histViews.length);
+    }
+  }
+
+  isViewChanged(histViews, curView) {
+    if (histViews.length > 0) {
+      let lastView = histViews.length - 1;
+      return (this.state.viewport != this.state.history_view[lastView] 
+        && !this.ExistedinViews(histViews, curView));      
+    } else return true;
+  }
+
+  ExistedinViews(histViews, curView) {
+    for(var i = 0; i < histViews.length; i++) {
+      if (curView == histViews[i]) return true;
+    }
+  }
+
+  // update parent component by passing func to sub component.
   render() {
     // viewport obj is ref to Root.state;
     const {viewport} = this.state;
@@ -115,15 +162,15 @@ export default class App extends Component {
         {...viewport}
         mapStyle="mapbox://styles/mapbox/streets-v10"
         onViewportChange={v => this.setState({viewport: v})}
-        onMoveEnd={v => this.navi(v)}
+        onMouseUp={e => this.navi(e)}
         preventStyleDiffing={false}
         mapboxApiAccessToken={token} >
 
-        <ControlPanel />
+        <ControlPanel className="hisView" pFunc={(v) => {this.navi(v)}}/>
 
-        <div className="nav" style={navStyle}>
+        <div className="nav" style={navStyle} onClick={e => {this.navi(e)}} >
           <NavigationControl onViewportChange={v=>this.setState({viewport: v})} 
-             onclick={e => this.navi(e)} />
+             />
           </div>
       </MapGL>
     );

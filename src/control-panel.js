@@ -12,14 +12,14 @@ export default class ControlPanel extends PureComponent {
     // subComponent of App, depend on parent.history_view;
     constructor(props) {
         super(props);
-        this.state = {
-            name: 'historyViewControl',
-        };
+        // this.state = {
+        //     name: 'historyViewControl',
+        // };
     }
 
     preView() {
         // call the App.setState({viewport: v})
-        console.log("go preView" + this);
+        console.log("go preView, com props: " + this.props);
     }
 
     nexView() {
@@ -27,11 +27,12 @@ export default class ControlPanel extends PureComponent {
         console.log("go nexView");
     }
 
+    // render(){} ... render func is built func for Component? 
     render() {
         return (
             <div style={histStyle}>
-                <button onClick={this.preView}>Pre</button>
-                <button onClick={this.nexView}>Nex</button>
+                <button onClick={() => this.props.pFunc(0)}>Pre</button>
+                <button onClick={() => this.props.pFunc(1)}>Nex</button>
             </div>
         )
     }
