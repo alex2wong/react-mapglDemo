@@ -12,10 +12,12 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "immutable": "^3.8.1",
     "mapbox-gl": "^0.38.0",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
-    "react-map-gl": "^3.0.0-alpha.12"
+    "react-map-gl": "^3.0.0-alpha.12",
+    "tween.js": "^16.6.0"
   },
   "devDependencies": {
     "babel-core": "^6.21.0",

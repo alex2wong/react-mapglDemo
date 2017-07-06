@@ -1,9 +1,14 @@
 /* global window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import MapGL, {NavigationControl} from 'react-map-gl';
+import MapGL, {NavigationControl, CanvasOverlay} from 'react-map-gl';
 
 import ControlPanel from './control-panel';
+import {defaultMapStyle, pointLayer} from './map-style.js';
+import {pointOnCircle, parseGaode} from './utils';
+
+import routes from '../assets/chongq2nanxi_coords.json';
+import {fromJS} from 'immutable';
 
 const token = process.env.MapboxAccessToken; // eslint-disable-line
 // const token = 'pk.eyJ1IjoiaHVhbmd5aXhpdSIsImEiOiI2WjVWR1hFIn0.1P90Q-tkbHS38BvnrhTI6w';
@@ -39,11 +44,14 @@ const panshi = {
   latitude: 42.942959
 }
 
+const coords = parseGaode(routes);
+
 // React Component named App...
 export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      mapStyle: defaultMapStyle,
       history_view: [],
       viewIndex: 0,
       viewport: {
@@ -66,6 +74,9 @@ export default class App extends Component {
       that._resize.call(that);
     });
     this._resize();
+    // window.requestAnimationFrame(function(){
+    //   that._animatePoint(that);
+    // });
   }
 
   componentWillUnmount() {
@@ -90,6 +101,30 @@ export default class App extends Component {
         height: this.props.height || window.innerHeight
       }
     });
+  }
+
+   _animatePoint() {
+    var that = this;
+    this._updatePointData(pointOnCircle({center: [yibin.longitude, yibin.latitude], angle: Date.now() / 1000, radius: 20}));
+    window.requestAnimationFrame(function(){
+      that._animatePoint.call(that);
+    });
+  }
+
+  // private methods for App.
+  _updatePointData(pointData) {
+    let {mapStyle} = this.state;
+    if (!mapStyle.hasIn(['source', 'point'])) {
+      mapStyle = mapStyle
+        // Add geojson source to map
+        .setIn(['sources', 'point'], fromJS({type: 'geojson'}))
+        // Add point layer to map
+        .set('layers', mapStyle.get('layers').push(pointLayer));
+    }
+    // Update data source
+    mapStyle = mapStyle.setIn(['sources', 'point', 'data'], pointData);
+
+    this.setState({mapStyle});
   }
 
 
@@ -156,6 +191,7 @@ export default class App extends Component {
   render() {
     // viewport obj is ref to Root.state;
     const {viewport} = this.state;
+    const canvView = Object.assign({}, viewport, {isDragging:false,redraw:overlayerDraw, locations:coords.coordinates});
 
     return (
       <MapGL
@@ -165,6 +201,15 @@ export default class App extends Component {
         onMouseUp={e => this.navi(e)}
         preventStyleDiffing={false}
         mapboxApiAccessToken={token} >
+
+        {/*{isDragging:false,redraw:()=>{console.log("ctx:" + ctx)}}*/}
+        <CanvasOverlay 
+          {...canvView}
+        dotRadius={4} 
+        globalOpacity={1} 
+        compositeOperation="screen"
+        dotFill="#1FBAD6"
+         />
 
         <ControlPanel className="hisView" pFunc={(v) => {this.navi(v)}}/>
 
@@ -176,6 +221,21 @@ export default class App extends Component {
     );
   }
 
+}
+
+function overlayerDraw(props) {
+  // console.log(props.ctx.canvas);
+  props.ctx.fillStyle = 'rgba(10, 100, 120, 0.2)';
+  let canvas = props.ctx.canvas;
+  props.ctx.clearRect(0,0,canvas.width, canvas.height);
+  for(let i=0;i<coords.coordinates.length;i++) {
+    props.ctx.beginPath();
+    let coord = coords.coordinates[i];
+    // one thing! there is no pitch/bearing project... only wgs84-> web mercator.
+    let point = props.project([coord.longitude, coord.latitude]);
+    props.ctx.arc(point[0], point[1], 4, 0, Math.PI*2);
+    props.ctx.fill();
+  }
 }
 
 // const root = document.createElement('div');
