@@ -11,4 +11,26 @@ export const pointLayer = fromJS({
   }
 });
 
+export const rasterStyle = fromJS({
+  "version": 8,
+  "name": "customRas",
+  "sources": {
+        "stamen": {
+            // "tiles": ["https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png"],
+            // "tiles": ["http://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}"],
+            "tiles": ["http://www.google.cn/maps/vt?lyrs=s@702&gl=cn&x={x}&y={y}&z={z}"],
+            "type": "raster",
+            'tileSize': 256
+        }
+    },
+  "layers": [
+            {
+                'id': 'custom-tms',
+                'type': 'raster',
+                'source': 'stamen',
+                'paint': {}
+            },
+  ]
+})
+
 export const defaultMapStyle = fromJS(MAP_STYLE);

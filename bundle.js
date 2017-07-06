@@ -24459,7 +24459,7 @@ exports.default = ControlPanel;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.defaultMapStyle = exports.pointLayer = undefined;
+exports.defaultMapStyle = exports.rasterStyle = exports.pointLayer = undefined;
 
 var _immutable = __webpack_require__(30);
 
@@ -24477,6 +24477,26 @@ var pointLayer = exports.pointLayer = (0, _immutable.fromJS)({
     'circle-radius': 10,
     'circle-color': '#007cbf'
   }
+});
+
+var rasterStyle = exports.rasterStyle = (0, _immutable.fromJS)({
+  "version": 8,
+  "name": "customRas",
+  "sources": {
+    "stamen": {
+      // "tiles": ["https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png"],
+      // "tiles": ["http://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}"],
+      "tiles": ["http://www.google.cn/maps/vt?lyrs=s@702&gl=cn&x={x}&y={y}&z={z}"],
+      "type": "raster",
+      'tileSize': 256
+    }
+  },
+  "layers": [{
+    'id': 'custom-tms',
+    'type': 'raster',
+    'source': 'stamen',
+    'paint': {}
+  }]
 });
 
 var defaultMapStyle = exports.defaultMapStyle = (0, _immutable.fromJS)(_mapStyleBasicV2.default);
@@ -25614,6 +25634,8 @@ if (!token) {
   throw new Error('Please specify a valid mapbox token');
 }
 
+var darkStyle = "mapbox://styles/mapbox/dark-v9";
+
 var navStyle = {
   position: 'absolute',
   top: 0,
@@ -25642,6 +25664,7 @@ var panshi = {
 };
 
 var coords = (0, _utils.parseGaode)(_chongq2nanxi_coords2.default);
+var rasterStyle2 = Object.assign(_mapStyle.defaultMapStyle, _mapStyle.rasterStyle);
 
 // React Component named App...
 
@@ -25654,7 +25677,7 @@ var App = function (_Component) {
     var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 
     _this.state = {
-      mapStyle: _mapStyle.defaultMapStyle,
+      mapStyle: rasterStyle2,
       history_view: [],
       viewIndex: 0,
       viewport: {
@@ -25740,7 +25763,7 @@ var App = function (_Component) {
       }
       // Update data source
       mapStyle = mapStyle.setIn(['sources', 'point', 'data'], pointData);
-
+      // mapStyle = mapStyle.setIn(['sources', 'stamen', 'tiles'])
       this.setState({ mapStyle: mapStyle });
     }
 
@@ -25821,11 +25844,11 @@ var App = function (_Component) {
       var viewport = this.state.viewport;
 
       var canvView = Object.assign({}, viewport, { isDragging: false, redraw: overlayerDraw, locations: coords.coordinates });
-
+      // const rasterStyle2 = Object.assign({}, this.state.defaultMapStyle, rasterStyle);
       return _react2.default.createElement(
         _reactMapGl2.default,
         _extends({}, viewport, {
-          mapStyle: 'mapbox://styles/mapbox/streets-v10',
+          mapStyle: this.state.mapStyle,
           onViewportChange: function onViewportChange(v) {
             return _this2.setState({ viewport: v });
           },
@@ -25865,7 +25888,7 @@ exports.default = App;
 
 function overlayerDraw(props) {
   // console.log(props.ctx.canvas);
-  props.ctx.fillStyle = 'rgba(10, 100, 120, 0.2)';
+  props.ctx.fillStyle = 'rgba(250, 250, 12, 0.4)';
   var canvas = props.ctx.canvas;
   props.ctx.clearRect(0, 0, canvas.width, canvas.height);
   for (var i = 0; i < coords.coordinates.length; i++) {

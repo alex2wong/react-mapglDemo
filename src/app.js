@@ -1,10 +1,10 @@
 /* global window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import MapGL, {NavigationControl, CanvasOverlay} from 'react-map-gl';
+import MapGL, {StaticMap ,NavigationControl, CanvasOverlay} from 'react-map-gl';
 
 import ControlPanel from './control-panel';
-import {defaultMapStyle, pointLayer} from './map-style.js';
+import {defaultMapStyle, rasterStyle, pointLayer} from './map-style.js';
 import {pointOnCircle, parseGaode} from './utils';
 
 import routes from '../assets/chongq2nanxi_coords.json';
@@ -16,6 +16,8 @@ const token = process.env.MapboxAccessToken; // eslint-disable-line
 if (!token) {
   throw new Error('Please specify a valid mapbox token');
 }
+
+const darkStyle = "mapbox://styles/mapbox/dark-v9";
 
 const navStyle = {
   position: 'absolute',
@@ -45,13 +47,14 @@ const panshi = {
 }
 
 const coords = parseGaode(routes);
+const rasterStyle2 = Object.assign(defaultMapStyle, rasterStyle);
 
 // React Component named App...
 export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      mapStyle: defaultMapStyle,
+      mapStyle: rasterStyle2,
       history_view: [],
       viewIndex: 0,
       viewport: {
@@ -123,7 +126,7 @@ export default class App extends Component {
     }
     // Update data source
     mapStyle = mapStyle.setIn(['sources', 'point', 'data'], pointData);
-
+    // mapStyle = mapStyle.setIn(['sources', 'stamen', 'tiles'])
     this.setState({mapStyle});
   }
 
@@ -192,11 +195,11 @@ export default class App extends Component {
     // viewport obj is ref to Root.state;
     const {viewport} = this.state;
     const canvView = Object.assign({}, viewport, {isDragging:false,redraw:overlayerDraw, locations:coords.coordinates});
-
+    // const rasterStyle2 = Object.assign({}, this.state.defaultMapStyle, rasterStyle);
     return (
       <MapGL
         {...viewport}
-        mapStyle="mapbox://styles/mapbox/streets-v10"
+        mapStyle={this.state.mapStyle}
         onViewportChange={v => this.setState({viewport: v})}
         onMouseUp={e => this.navi(e)}
         preventStyleDiffing={false}
@@ -225,7 +228,7 @@ export default class App extends Component {
 
 function overlayerDraw(props) {
   // console.log(props.ctx.canvas);
-  props.ctx.fillStyle = 'rgba(10, 100, 120, 0.2)';
+  props.ctx.fillStyle = 'rgba(250, 250, 12, 0.4)';
   let canvas = props.ctx.canvas;
   props.ctx.clearRect(0,0,canvas.width, canvas.height);
   for(let i=0;i<coords.coordinates.length;i++) {
