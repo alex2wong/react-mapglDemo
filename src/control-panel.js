@@ -33,6 +33,7 @@ export default class ControlPanel extends PureComponent {
             <div style={histStyle}>
                 <button onClick={() => this.props.pFunc(0)}>Pre</button>
                 <button onClick={() => this.props.pFunc(1)}>Nex</button>
+                <button onClick={() => this.props.goPolyLayer()} >PolyLayer</button>
             </div>
         )
     }

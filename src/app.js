@@ -4,11 +4,12 @@ import {render} from 'react-dom';
 import MapGL, {StaticMap ,NavigationControl, CanvasOverlay} from 'react-map-gl';
 
 import ControlPanel from './control-panel';
-import {defaultMapStyle, rasterStyle, pointLayer} from './map-style.js';
+import {defaultMapStyle, rasterStyle, pointLayer, polyLayer} from './map-style.js';
 import {pointOnCircle, parseGaode} from './utils';
 
 import routes from '../assets/chongq2nanxi_coords.json';
 import {fromJS} from 'immutable';
+import {json as requestJson}  from 'd3-request';
 
 const token = process.env.MapboxAccessToken; // eslint-disable-line
 // const token = 'pk.eyJ1IjoiaHVhbmd5aXhpdSIsImEiOiI2WjVWR1hFIn0.1P90Q-tkbHS38BvnrhTI6w';
@@ -77,9 +78,11 @@ export default class App extends Component {
       that._resize.call(that);
     });
     this._resize();
-    // window.requestAnimationFrame(function(){
-    //   that._animatePoint(that);
-    // });
+    requestJson('../assets/feature-example-sf.json', (error, response) => {
+      if (!error) {
+        this._updatePointData(response);
+      }
+    });
   }
 
   componentWillUnmount() {
@@ -115,17 +118,18 @@ export default class App extends Component {
   }
 
   // private methods for App.
-  _updatePointData(pointData) {
+  _updatePointData(polygons) {
     let {mapStyle} = this.state;
-    if (!mapStyle.hasIn(['source', 'point'])) {
+    if (!mapStyle.hasIn(['source', 'polyLayer'])) {
       mapStyle = mapStyle
         // Add geojson source to map
-        .setIn(['sources', 'point'], fromJS({type: 'geojson'}))
+        .setIn(['sources', 'polyLayer'], fromJS({type: 'geojson'}))
         // Add point layer to map
-        .set('layers', mapStyle.get('layers').push(pointLayer));
+        .set('layers', mapStyle.get('layers').push(polyLayer));
     }
     // Update data source
-    mapStyle = mapStyle.setIn(['sources', 'point', 'data'], pointData);
+    console.log("### geojson polygons added to map source..");
+    mapStyle = mapStyle.setIn(['sources', 'polyLayer', 'data'], polygons);
     // mapStyle = mapStyle.setIn(['sources', 'stamen', 'tiles'])
     this.setState({mapStyle});
   }
@@ -190,6 +194,12 @@ export default class App extends Component {
     }
   }
 
+  goPolyLayer(viewport) {
+    const newView = Object.assign(viewport, {longitude: -122.4, latitude: 37.8});
+    this.setState({newView});
+    console.warn("viewport changed to USA_SF...");
+  }
+
   // update parent component by passing func to sub component.
   render() {
     // viewport obj is ref to Root.state;
@@ -214,7 +224,9 @@ export default class App extends Component {
         dotFill="#1FBAD6"
          />
 
-        <ControlPanel className="hisView" pFunc={(v) => {this.navi(v)}}/>
+        <ControlPanel className="hisView" pFunc={(v) => {this.navi(v)}}
+          goPolyLayer={() => this.goPolyLayer(this.state.viewport)}
+          />
 
         <div className="nav" style={navStyle} onClick={e => {this.navi(e)}} >
           <NavigationControl onViewportChange={v=>this.setState({viewport: v})} 

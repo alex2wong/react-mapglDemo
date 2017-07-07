@@ -10,19 +10,38 @@ export function pointOnCircle({center, angle, radius}) {
   };
 }
 
-// input [x,y,x1,y1] return [[x,y], [x1,y1]]
-function parseCoor(flatCoor) {
+let strategy = {
+  'geojson': function(flatCoords, i) {
+    return {
+      type: 'Point',
+      coordinates: [parseFloat(flatCoords[i*2]), parseFloat(flatCoords[i*2+1])]
+    }
+  },
+  'lonlat': function(flatCoords, i) {
+    return {
+      'longitude': parseFloat(flatCoords[i*2]),
+      'latitude': parseFloat(flatCoords[i*2+1])
+    }
+  },
+  'coords': function(flatCoords, i) {
+    return [parseFloat(flatCoords[i*2]), parseFloat(flatCoords[i*2+1])];
+  }
+}
+
+// input [x,y,x1,y1] return array with point obj.
+function parseCoor(flatCoor, retType) {
     var flatCoor = flatCoor.replace('[',"");
     flatCoor = flatCoor.replace(']',"");
     var coords = [], flatCoords = flatCoor.split(",");
     for (let i=0;i<flatCoords.length/2;i++) {
-        let point = {};
         // which format do you output.. [x,y] or {latitude, longitude}
         // point.push(parseFloat(flatCoords[i*2]));
         // point.push(parseFloat(flatCoords[i*2+1]));
-        point.longitude = parseFloat(flatCoords[i*2]);
-        point.latitude = parseFloat(flatCoords[i*2+1]);
-        coords.push(point);
+        if (typeof retType == 'string' && strategy[retType] !== undefined) {
+          let func = strategy[retType];
+          let point = func.call(this, flatCoords, i);
+          coords.push(point);
+        }
     }
     return coords;
 }
