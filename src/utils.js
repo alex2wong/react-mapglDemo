@@ -46,7 +46,7 @@ function parseCoor(flatCoor, retType) {
     return coords;
 }
 
-export function parseGaode(json) {
+export function parseGaode(json, retType) {
   let res = null, coords = [];
   if (typeof json == 'string') {
     res = JSON.parse(json);
@@ -62,7 +62,7 @@ export function parseGaode(json) {
         for (let j=0; j< subPath.segments.length;j++) {
             let segment = subPath.segments[j];
             if (segment.coor === undefined) continue;
-            coords.push(...parseCoor(segment.coor));
+            coords.push(...parseCoor(segment.coor, retType));
         }
     }
     console.log("parsed path with vertex num: " + coords.length);

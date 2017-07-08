@@ -4,6 +4,8 @@ import {render} from 'react-dom';
 import MapGL, {StaticMap ,NavigationControl, CanvasOverlay} from 'react-map-gl';
 
 import ControlPanel from './control-panel';
+import Timeline from './timeline';
+
 import {defaultMapStyle, rasterStyle, pointLayer, polyLayer} from './map-style.js';
 import {pointOnCircle, parseGaode} from './utils';
 
@@ -47,7 +49,7 @@ const panshi = {
   latitude: 42.942959
 }
 
-const coords = parseGaode(routes);
+const coords = parseGaode(routes, 'lonlat');
 const rasterStyle2 = Object.assign(defaultMapStyle, rasterStyle);
 
 // React Component named App...
@@ -62,15 +64,15 @@ export default class App extends Component {
         latitude: yibin.latitude,
         longitude: yibin.longitude,
         zoom: 11,
-        bearing: 0,
-        pitch: 0,
+        bearing: 20,
+        pitch: 40,
         width: window.innerWidth,
         height: window.innerHeight
       }
     };
   }
 
-  // register window resize event..
+  // register window resize event.. component lifecycle start.
   componentDidMount() {
     var that = this;
     // when registering ,store App Component in `that`, which in a closure.
@@ -78,7 +80,8 @@ export default class App extends Component {
       that._resize.call(that);
     });
     this._resize();
-    requestJson('../assets/feature-example-sf.json', (error, response) => {
+    requestJson('https://alex2wong.github.io/react-mapglDemo/assets/feature-example-sf.json', 
+    (error, response) => {
       if (!error) {
         this._updatePointData(response);
       }
@@ -94,18 +97,12 @@ export default class App extends Component {
 
   // set Component state when resize..
   _resize() {
-    // let oldVP = {};
-
-    // Object.assign(oldVP,this.state.viewport);
+    // let oldVP = {};    
     this.setState({
-      viewport: {
-        // object assign.. destruct?? require props for MapGL
-        latitude: this.state.viewport.latitude,
-        longitude: this.state.viewport.longitude,
-        zoom: this.state.viewport.zoom,
+      viewport: Object.assign({},this.state.viewport, {
         width: this.props.width || window.innerWidth,
         height: this.props.height || window.innerHeight
-      }
+      })
     });
   }
 
@@ -168,6 +165,7 @@ export default class App extends Component {
     } else if (v != 0 && v!= 1){
       this.add2hist(this.state.history_view, this.state.viewport);
     }
+
   }
 
   add2hist(histViews, curView) {
@@ -194,10 +192,18 @@ export default class App extends Component {
     }
   }
 
-  goPolyLayer(viewport) {
+  goPolyLayer(viewport, evt) {
     const newView = Object.assign(viewport, {longitude: -122.4, latitude: 37.8});
     this.setState({newView});
     console.warn("viewport changed to USA_SF...");
+    console.warn("click evt: " + evt);
+    evt.stopPropagation();
+    evt.preventDefault();
+  }
+
+  // test event propogation..
+  test(evt) {
+    console.log(evt);
   }
 
   // update parent component by passing func to sub component.
@@ -224,8 +230,10 @@ export default class App extends Component {
         dotFill="#1FBAD6"
          />
 
-        <ControlPanel className="hisView" pFunc={(v) => {this.navi(v)}}
-          goPolyLayer={() => this.goPolyLayer(this.state.viewport)}
+        <Timeline class="timeline" />
+
+        <ControlPanel className="hisView" onClick={(e)=>this.test(e)} pFunc={(v) => {this.navi(v)}}
+          goPolyLayer={(evt) => this.goPolyLayer(this.state.viewport, evt)}
           />
 
         <div className="nav" style={navStyle} onClick={e => {this.navi(e)}} >
@@ -239,8 +247,7 @@ export default class App extends Component {
 }
 
 function overlayerDraw(props) {
-  // console.log(props.ctx.canvas);
-  props.ctx.fillStyle = 'rgba(250, 250, 12, 0.4)';
+  props.ctx.fillStyle = 'rgba(10, 210, 250, 0.4)';
   let canvas = props.ctx.canvas;
   props.ctx.clearRect(0,0,canvas.width, canvas.height);
   for(let i=0;i<coords.coordinates.length;i++) {

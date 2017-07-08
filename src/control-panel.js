@@ -14,7 +14,18 @@ export default class ControlPanel extends PureComponent {
         super(props);
         // this.state = {
         //     name: 'historyViewControl',
-        // };
+        // };        
+    }
+
+    componentDidMount() {
+        document.querySelector("#target").addEventListener("dblclick", function(evt){
+            evt.cancelBubble = true;
+            evt.preventDefault();
+            evt.stopPropagation();
+            evt.stopImmediatePropagation();
+            console.log("dbclick count..");
+            return;            
+        });
     }
 
     preView() {
@@ -31,9 +42,10 @@ export default class ControlPanel extends PureComponent {
     render() {
         return (
             <div style={histStyle}>
-                <button onClick={() => this.props.pFunc(0)}>Pre</button>
-                <button onClick={() => this.props.pFunc(1)}>Nex</button>
-                <button onClick={() => this.props.goPolyLayer()} >PolyLayer</button>
+                <a href="#" className="btn" onClick={() => this.props.pFunc(0)}>Pre</a>
+                <a href="#" className="btn" onClick={() => this.props.pFunc(1)}>Nex</a>
+                <a href="#" className="btn" id="target" 
+                    onClick={(evt) => this.props.goPolyLayer(evt)} >PolyLayer</a>
             </div>
         )
     }

@@ -24,7 +24,39 @@ label {
   width: 160px;
 }
 
+.btn,
 input {
+  border: 1px solid #EEE;
+  background: #FFF;
+  height: 32px;
+  border-radius: 2px;
   margin-left: 20px;
   max-width: 60px;
+  text-decoration: none;
+  box-shadow: 1px 1px 1px rgba(0,0,0,0.3);
 }
+
+.btn {
+  margin-left: 0;
+  padding: 6px;
+}
+
+.eventItem {
+  padding: 4px;
+}
+
+.btn:hover,
+.eventItem:hover {
+  background: #EEE;
+}
+
+span {
+  padding: 6px;
+}
+
+/*.timeline {
+  position: absolute;
+  top: 40px;
+  left: 60px;
+  list-style: none;
+}*/
