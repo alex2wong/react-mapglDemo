@@ -7,7 +7,7 @@ export const polyLayer = fromJS({
   type: 'fill',
   interactive: true,
   paint: {
-    'fill-color': '#007cbf',
+    'fill-color': '#ffeb3b',
     'fill-opacity': 0.8
   }
 });
@@ -18,7 +18,7 @@ export const pointLayer = fromJS({
   type: 'circle',
   paint: {
     'circle-radius': 10,
-    'circle-color': '#007cbf'
+    'circle-color': '#ffeb3b'
   }
 });
 
@@ -27,8 +27,8 @@ export const rasterStyle = fromJS({
   "name": "customRas",
   "sources": {
         "stamen": {
-            "tiles": ["https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png"],
-            // "tiles": ["http://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}"],
+            // "tiles": ["https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png"],
+            "tiles": ["https://111.231.11.20:3003/proxy/?proxyURI=http://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}"],
             // "tiles": ["http://www.google.cn/maps/vt?lyrs=s@702&gl=cn&x={x}&y={y}&z={z}"],
             "type": "raster",
             'tileSize': 256

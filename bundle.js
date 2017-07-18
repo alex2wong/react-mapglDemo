@@ -25581,7 +25581,7 @@ var polyLayer = exports.polyLayer = (0, _immutable.fromJS)({
   type: 'fill',
   interactive: true,
   paint: {
-    'fill-color': '#007cbf',
+    'fill-color': '#ffeb3b',
     'fill-opacity': 0.8
   }
 });
@@ -25592,7 +25592,7 @@ var pointLayer = exports.pointLayer = (0, _immutable.fromJS)({
   type: 'circle',
   paint: {
     'circle-radius': 10,
-    'circle-color': '#007cbf'
+    'circle-color': '#ffeb3b'
   }
 });
 
@@ -25601,8 +25601,8 @@ var rasterStyle = exports.rasterStyle = (0, _immutable.fromJS)({
   "name": "customRas",
   "sources": {
     "stamen": {
-      "tiles": ["https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png"],
-      // "tiles": ["http://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}"],
+      // "tiles": ["https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png"],
+      "tiles": ["https://111.231.11.20:3003/proxy/?proxyURI=http://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}"],
       // "tiles": ["http://www.google.cn/maps/vt?lyrs=s@702&gl=cn&x={x}&y={y}&z={z}"],
       "type": "raster",
       'tileSize': 256
@@ -25673,6 +25673,8 @@ var Timeline = function (_PureComponent) {
     }, {
         key: 'render',
         value: function render() {
+            var _this2 = this;
+
             return _react2.default.createElement(
                 'div',
                 null,
@@ -25681,7 +25683,9 @@ var Timeline = function (_PureComponent) {
                     { style: ulistStyle },
                     _react2.default.createElement(
                         'li',
-                        { className: 'eventItem', style: itemStyle },
+                        { className: 'eventItem', style: itemStyle, onClick: function onClick() {
+                                _this2.props.handleItem(0);
+                            } },
                         _react2.default.createElement(
                             'span',
                             null,
@@ -25690,7 +25694,9 @@ var Timeline = function (_PureComponent) {
                     ),
                     _react2.default.createElement(
                         'li',
-                        { className: 'eventItem', style: itemStyle },
+                        { className: 'eventItem', style: itemStyle, onClick: function onClick() {
+                                _this2.props.handleItem(1);
+                            } },
                         _react2.default.createElement(
                             'span',
                             null,
@@ -25699,7 +25705,9 @@ var Timeline = function (_PureComponent) {
                     ),
                     _react2.default.createElement(
                         'li',
-                        { className: 'eventItem', style: itemStyle },
+                        { className: 'eventItem', style: itemStyle, onClick: function onClick() {
+                                _this2.props.handleItem(2);
+                            } },
                         _react2.default.createElement(
                             'span',
                             null,
@@ -27304,6 +27312,14 @@ var App = function (_Component) {
       console.log(evt);
     }
 
+    // setState({newView}) to navi viewport to event position.
+
+  }, {
+    key: 'fly2position',
+    value: function fly2position(viewport, item) {
+      console.log("event position for event " + item);
+    }
+
     // update parent component by passing func to sub component.
 
   }, {
@@ -27315,7 +27331,7 @@ var App = function (_Component) {
       var viewport = this.state.viewport;
 
       var canvView = Object.assign({}, viewport, { isDragging: false, redraw: overlayerDraw, locations: coords.coordinates });
-      // const rasterStyle2 = Object.assign({}, this.state.defaultMapStyle, rasterStyle);
+      var eventView = Object.assign({}, viewport, { isDragging: false, redraw: circleDraw });
       return _react2.default.createElement(
         _reactMapGl2.default,
         _extends({}, viewport, {
@@ -27334,7 +27350,12 @@ var App = function (_Component) {
           compositeOperation: 'screen',
           dotFill: '#1FBAD6'
         })),
-        _react2.default.createElement(_timeline2.default, { 'class': 'timeline' }),
+        _react2.default.createElement(_reactMapGl.CanvasOverlay, _extends({}, eventView, {
+          globalOpacity: 0.95
+        })),
+        _react2.default.createElement(_timeline2.default, { 'class': 'timeline', handleItem: function handleItem(item) {
+            _this3.fly2position(_this3.state.viewport, item);
+          } }),
         _react2.default.createElement(_controlPanel2.default, { className: 'hisView', onClick: function onClick(e) {
             return _this3.test(e);
           }, pFunc: function pFunc(v) {
@@ -27364,18 +27385,78 @@ var App = function (_Component) {
 exports.default = App;
 
 
+var radius = 10,
+    animateTimer = null,
+    pathIndex = 0;
+function preSetCtx(context) {
+  //默认值为source-over
+  var prev = context.globalCompositeOperation;
+  //只显示canvas上原图像的重叠部分
+  context.globalCompositeOperation = 'destination-in';
+  //设置主canvas的绘制透明度
+  context.globalAlpha = 0.95;
+  //这一步目的是将canvas上的图像变的透明
+  context.fillRect(0, 0, context.canvas.width, context.canvas.height);
+  //在原图像上重叠新图像
+  context.globalCompositeOperation = prev;
+}
+function renderCircle(context, point) {
+  //画圆
+  preSetCtx(context);
+  // context.clearRect(0,0,context.canvas.width, context.canvas.height);
+  context.beginPath();
+  context.arc(point[0], point[1], radius, 0, Math.PI * 2);
+  context.closePath();
+  context.lineWidth = 2; //线条宽度
+  context.strokeStyle = 'rgba(250,250,50, 0.9)'; //颜色
+  context.stroke();
+
+  radius += 0.5; //每一帧半径增加0.5
+  //半径radius大于30时，重置为0
+  if (radius > 20) {
+    radius = 5;
+  }
+}
+
+function renderPath(context, point) {
+  preSetCtx(context);
+  context.beginPath();
+  context.arc(point[0], point[1], 8, 0, Math.PI * 2);
+  context.closePath();
+  context.lineWidth = 2; //线条宽度
+  context.fillStyle = 'rgba(250, 20, 20, 0.4)';
+  context.fill();
+}
+
+function circleDraw(props) {
+  //  // if viewport changed, clear old interval.
+  // clearInterval(animateTimer);  
+  // animateTimer = window.setInterval(function(){
+  //   renderCircle(props.ctx, props.project([yibin.longitude, yibin.latitude]));
+  // }, 40);  
+}
+
 function overlayerDraw(props) {
-  props.ctx.fillStyle = 'rgba(10, 210, 250, 0.4)';
+  // purple, 253, 45,215. lightblue 10, 210, 250， yellow: 255,235,59
+  props.ctx.fillStyle = 'rgba(250, 20, 20, 0.9)';
   var canvas = props.ctx.canvas;
   props.ctx.clearRect(0, 0, canvas.width, canvas.height);
-  for (var i = 0; i < coords.coordinates.length; i++) {
-    props.ctx.beginPath();
-    var coord = coords.coordinates[i];
-    // one thing! there is no pitch/bearing project... only wgs84-> web mercator.
-    var point = props.project([coord.longitude, coord.latitude]);
-    props.ctx.arc(point[0], point[1], 4, 0, Math.PI * 2);
-    props.ctx.fill();
-  }
+  var pathlen = coords.coordinates.length;
+  clearInterval(animateTimer);
+  // for(let i=0;i<pathlen;i++) {
+  // props.ctx.beginPath();
+  // let coord = coords.coordinates[i];
+  // // one thing! there is no pitch/bearing project... only wgs84-> web mercator.
+  // let point = props.project([coord.longitude, coord.latitude]);
+  // props.ctx.arc(point[0], point[1], 4, 0, Math.PI*2);
+  // props.ctx.fill();
+  animateTimer = window.setInterval(function () {
+    renderPath(props.ctx, props.project([coords.coordinates[pathIndex].longitude, coords.coordinates[pathIndex].latitude]));
+    if (pathIndex < pathlen - 10) {
+      pathIndex += 10;
+    }
+    renderCircle(props.ctx, props.project([yibin.longitude, yibin.latitude]));
+  }, 25);
 }
 
 // const root = document.createElement('div');

@@ -206,12 +206,17 @@ export default class App extends Component {
     console.log(evt);
   }
 
+  // setState({newView}) to navi viewport to event position.
+  fly2position(viewport, item) {
+    console.log("event position for event " + item);
+  }
+
   // update parent component by passing func to sub component.
   render() {
     // viewport obj is ref to Root.state;
     const {viewport} = this.state;
     const canvView = Object.assign({}, viewport, {isDragging:false,redraw:overlayerDraw, locations:coords.coordinates});
-    // const rasterStyle2 = Object.assign({}, this.state.defaultMapStyle, rasterStyle);
+    const eventView = Object.assign({}, viewport, {isDragging:false,redraw:circleDraw});
     return (
       <MapGL
         {...viewport}
@@ -230,7 +235,12 @@ export default class App extends Component {
         dotFill="#1FBAD6"
          />
 
-        <Timeline class="timeline" />
+         <CanvasOverlay 
+          {...eventView}
+        globalOpacity={0.95} 
+         />
+
+        <Timeline class="timeline" handleItem={(item)=>{this.fly2position(this.state.viewport,item)}}/>
 
         <ControlPanel className="hisView" onClick={(e)=>this.test(e)} pFunc={(v) => {this.navi(v)}}
           goPolyLayer={(evt) => this.goPolyLayer(this.state.viewport, evt)}
@@ -246,18 +256,77 @@ export default class App extends Component {
 
 }
 
+var radius = 10, animateTimer = null, pathIndex = 0;
+function preSetCtx(context) {
+  //默认值为source-over
+    var prev = context.globalCompositeOperation;
+    //只显示canvas上原图像的重叠部分
+    context.globalCompositeOperation = 'destination-in';
+    //设置主canvas的绘制透明度
+    context.globalAlpha = 0.95;
+    //这一步目的是将canvas上的图像变的透明
+    context.fillRect(0, 0, context.canvas.width, context.canvas.height);
+    //在原图像上重叠新图像
+    context.globalCompositeOperation = prev;
+}
+function renderCircle(context, point) {
+  //画圆
+    preSetCtx(context);
+    // context.clearRect(0,0,context.canvas.width, context.canvas.height);
+    context.beginPath();
+    context.arc(point[0], point[1], radius, 0, Math.PI * 2);    
+    context.closePath();
+    context.lineWidth = 2; //线条宽度
+    context.strokeStyle = 'rgba(250,250,50, 0.9)'; //颜色
+    context.stroke();
+
+    radius += 0.5; //每一帧半径增加0.5
+    //半径radius大于30时，重置为0
+    if (radius > 20) {
+        radius = 5;
+    }
+}
+
+function renderPath(context, point) {
+  preSetCtx(context);
+  context.beginPath();
+  context.arc(point[0], point[1], 8, 0, Math.PI * 2);    
+  context.closePath();
+  context.lineWidth = 2; //线条宽度
+  context.fillStyle = 'rgba(250, 20, 20, 0.4)';
+  context.fill();
+}
+
+function circleDraw(props) {
+  //  // if viewport changed, clear old interval.
+  // clearInterval(animateTimer);  
+  // animateTimer = window.setInterval(function(){
+  //   renderCircle(props.ctx, props.project([yibin.longitude, yibin.latitude]));
+  // }, 40);  
+}
+
 function overlayerDraw(props) {
-  props.ctx.fillStyle = 'rgba(10, 210, 250, 0.4)';
+  // purple, 253, 45,215. lightblue 10, 210, 250， yellow: 255,235,59
+  props.ctx.fillStyle = 'rgba(250, 20, 20, 0.9)';
   let canvas = props.ctx.canvas;
   props.ctx.clearRect(0,0,canvas.width, canvas.height);
-  for(let i=0;i<coords.coordinates.length;i++) {
-    props.ctx.beginPath();
-    let coord = coords.coordinates[i];
-    // one thing! there is no pitch/bearing project... only wgs84-> web mercator.
-    let point = props.project([coord.longitude, coord.latitude]);
-    props.ctx.arc(point[0], point[1], 4, 0, Math.PI*2);
-    props.ctx.fill();
-  }
+  let pathlen = coords.coordinates.length;
+  clearInterval(animateTimer);
+  // for(let i=0;i<pathlen;i++) {
+    // props.ctx.beginPath();
+    // let coord = coords.coordinates[i];
+    // // one thing! there is no pitch/bearing project... only wgs84-> web mercator.
+    // let point = props.project([coord.longitude, coord.latitude]);
+    // props.ctx.arc(point[0], point[1], 4, 0, Math.PI*2);
+    // props.ctx.fill();
+  animateTimer = window.setInterval(function() {
+    renderPath(props.ctx, props.project([
+      coords.coordinates[pathIndex].longitude, coords.coordinates[pathIndex].latitude]));
+    if (pathIndex < (pathlen-10)) {
+      pathIndex += 10;
+    }
+    renderCircle(props.ctx, props.project([yibin.longitude, yibin.latitude]));
+  }, 25);
 }
 
 // const root = document.createElement('div');
