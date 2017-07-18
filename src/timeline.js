@@ -28,13 +28,13 @@ export default class Timeline extends PureComponent{
         return(
         <div>
             <ul style={ulistStyle}>
-                <li className='eventItem' style={itemStyle} onClick={()=>this.props.handleClick(0)}>
+                <li className='eventItem' style={itemStyle} onClick={()=>{this.props.handleItem(0)}}>
                     <span>迎接Bride</span>
                 </li>
-                <li className='eventItem' style={itemStyle} onClick={()=>this.props.handleClick(1)}>
+                <li className='eventItem' style={itemStyle} onClick={()=>{this.props.handleItem(1)}}>
                     <span>Wedding Ceremony</span>
                 </li>
-                <li className='eventItem' style={itemStyle} onClick={()=>this.props.handleClick(2)}>
+                <li className='eventItem' style={itemStyle} onClick={()=>{this.props.handleItem(2)}}>
                     <span>Taking Photo</span>
                 </li>
             </ul>
