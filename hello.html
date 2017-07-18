@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hello React!</title>
+    <script src="build/react.js"></script>
+    <script src="build/react-dom.js"></script>
+    <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
+  </head>
+  <body>
+    <div id="example"></div>
+    <svg style="height: 38px;width: 38px;">
+      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="./assets/sprites.svg#settings"></use>
+      </svg>
+    <svg style="height: 38px;width: 38px;">
+      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="./assets/sprites.svg#accept"></use>
+      </svg>
+    <svg style="height: 38px;width: 38px;">
+      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="./assets/sprites.svg#save"></use>
+      </svg>
+    <script type="text/babel">
+    	var Counter = React.createClass({
+    		getInitialState: function () {
+	          return { count: 12 };
+	        },
+        handleClick: function(evt) {
+            console.log('childClicked');
+            // evt.stopPropagation();
+        },
+    		render: function() {
+    			return <h2 onClick={this.handleClick}>Current count is: {this.state.count}</h2>;
+    		}
+    	});
+      ReactDOM.render(
+        <div onClick={()=>{console.log("parentClicked..")}}><h1>test event</h1>
+        	<Counter />
+        </div>,
+        document.getElementById('example')
+      );
+    </script>
+  </body>
+</html>

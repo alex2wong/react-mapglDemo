@@ -49,6 +49,24 @@ const panshi = {
   latitude: 42.942959
 }
 
+const eventTable = {
+  1: {
+    eventName: 'Fetch Bride',
+    time: '8:30 am',
+    place: 'hotel',
+  },
+  2: {
+    eventName: 'Wedding ceremony',
+    time: '12:08 am',
+    place: 'hotel',
+  },
+  3: {
+    eventName: 'Taking Photo',
+    time: '15:30 am',
+    place: 'riverside',
+  },
+}
+
 const coords = parseGaode(routes, 'lonlat');
 const rasterStyle2 = Object.assign(defaultMapStyle, rasterStyle);
 
@@ -201,9 +219,9 @@ export default class App extends Component {
     evt.preventDefault();
   }
 
-  // test event propogation..
-  test(evt) {
-    console.log(evt);
+  // event/timeline table..
+  fly2Event(type) {
+    // fly2 different viewport and display detail..
   }
 
   // update parent component by passing func to sub component.
@@ -230,7 +248,7 @@ export default class App extends Component {
         dotFill="#1FBAD6"
          />
 
-        <Timeline class="timeline" />
+        <Timeline class="timeline" handleClick={(type)=>{this.fly2Event(type)}}/>
 
         <ControlPanel className="hisView" onClick={(e)=>this.test(e)} pFunc={(v) => {this.navi(v)}}
           goPolyLayer={(evt) => this.goPolyLayer(this.state.viewport, evt)}
