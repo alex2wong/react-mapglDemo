@@ -18,5 +18,8 @@ During the process, some usefull modules or components would be dev for react-ma
 - 在react子组件中调用root组件中对map viewport的记录和回访
 - 这个插件可用于viewport回访，加上mapbox-gl 的动画可以达到较好的展示效果
 
+DEMO screenshot:
+![DEMO screenshot:](https://raw.githubusercontent.com/alex2wong/react-mapglDemo/master/assets/demoScreen.gif.gif)
+
 #### 准备做的
 - 时间轴和 viewport 的联动

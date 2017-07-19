@@ -93,7 +93,7 @@ export default class App extends Component {
       viewport: {
         latitude: yibin.latitude,
         longitude: yibin.longitude,
-        zoom: 11,
+        zoom: 9,
         bearing: 20,
         pitch: 40,
         width: window.innerWidth,
