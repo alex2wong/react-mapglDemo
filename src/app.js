@@ -12,6 +12,9 @@ import {pointOnCircle, parseGaode} from './utils';
 import routes from '../assets/chongq2nanxi_coords.json';
 import {fromJS} from 'immutable';
 import {json as requestJson}  from 'd3-request';
+import Curve from './curveLine';
+import {PointLayer, PathLayer, drawCircle} from './canvasLine';
+import {shanghai, yibin, beijing, chengdu, panshi, eventTable} from './data';
 
 const token = process.env.MapboxAccessToken; // eslint-disable-line
 // const token = 'pk.eyJ1IjoiaHVhbmd5aXhpdSIsImEiOiI2WjVWR1hFIn0.1P90Q-tkbHS38BvnrhTI6w';
@@ -29,56 +32,6 @@ const navStyle = {
   padding: '10px'
 }
 
-const shanghai = {
-  longitude: 120.4114,
-  latitude: 30.777
-}
-
-const yibin = {
-  longitude: 104.973206,
-  latitude: 28.837425
-}
-
-const beijing = {
-  longitude: 116.379559,
-  latitude: 39.896465,
-}
-
-const panshi = {
-  longitude: 126.077091,
-  latitude: 42.942959
-}
-
-const eventTable = {
-  1: {
-    eventName: 'Fetch Bride',
-    time: '8:30 am',
-    location: {
-      longitude: 104.973206,
-      latitude: 28.837425
-    },
-    place: 'hotel',
-  },
-  2: {
-    eventName: 'Wedding ceremony',
-    time: '12:08 am',
-    location: {
-      longitude: 104.973206,
-      latitude: 28.837425
-    },
-    place: 'hotel',
-  },
-  3: {
-    eventName: 'Taking Photo',
-    time: '15:30 am',
-    location: {
-      longitude: 104.970206,
-      latitude: 28.835425
-    },
-    place: 'riverside',
-  },
-}
-
 const coords = parseGaode(routes, 'lonlat');
 const rasterStyle2 = Object.assign(defaultMapStyle, rasterStyle);
 
@@ -94,7 +47,7 @@ export default class App extends Component {
         latitude: yibin.latitude,
         longitude: yibin.longitude,
         zoom: 9,
-        bearing: 20,
+        bearing: 0,
         pitch: 40,
         width: window.innerWidth,
         height: window.innerHeight
@@ -102,7 +55,7 @@ export default class App extends Component {
     };
   }
 
-  // register window resize event.. component lifecycle start.
+  // register window resize event.. component lifecycle start! Only Once!
   componentDidMount() {
     var that = this;
     // when registering ,store App Component in `that`, which in a closure.
@@ -110,14 +63,16 @@ export default class App extends Component {
       that._resize.call(that);
     });
     this._resize();
-    requestJson('https://alex2wong.github.io/react-mapglDemo/assets/feature-example-sf.json', 
-    (error, response) => {
-      if (!error) {
-        this._updatePointData(response);
-      }
-    });
+    // // test request remote jsonData
+    // requestJson('https://alex2wong.github.io/react-mapglDemo/assets/feature-example-sf.json', 
+    // (error, response) => {
+    //   if (!error) {
+    //     this._updatePointData(response);
+    //   }
+    // });
   }
 
+// when com lifecycle end.
   componentWillUnmount() {
     let that = this;
     window.removeEventListener('resize', function(){
@@ -147,6 +102,7 @@ export default class App extends Component {
   // private methods for App.
   _updatePointData(polygons) {
     let {mapStyle} = this.state;
+    // hasIn setIn is immutable methods.. return deep copy ones.
     if (!mapStyle.hasIn(['source', 'polyLayer'])) {
       mapStyle = mapStyle
         // Add geojson source to map
@@ -231,12 +187,7 @@ export default class App extends Component {
     evt.preventDefault();
   }
 
-  // event/timeline table..
-  fly2Event(type) {
-    // fly2 different viewport and display detail..
-  }
-
-  // setState({newView}) to navi viewport to event position.
+  // setState({newView}) to navi viewport to event position and display detail..
   fly2position(viewport, item) {
     console.log("event position for event " + item);
   }
@@ -245,8 +196,10 @@ export default class App extends Component {
   render() {
     // viewport obj is ref to Root.state;
     const {viewport} = this.state;
-    const canvView = Object.assign({}, viewport, {isDragging:false,redraw:overlayerDraw, locations:coords.coordinates});
-    const eventView = Object.assign({}, viewport, {isDragging:false,redraw:circleDraw});
+    var pathLayer = new PathLayer({});
+    var pointLayer = new PointLayer({});
+    const canvView = Object.assign({}, viewport, {isDragging:false,redraw:pathLayer.drawPath, coords:coords});
+    const eventView = Object.assign({}, viewport, {isDragging:false,redraw:drawCircle});
     return (
       <MapGL
         {...viewport}
@@ -263,11 +216,15 @@ export default class App extends Component {
         globalOpacity={1} 
         compositeOperation="screen"
         dotFill="#1FBAD6"
+        strokeStyle="rgba(131, 235, 235, 0.8)"
          />
 
          <CanvasOverlay 
           {...eventView}
-        globalOpacity={0.95} 
+        globalOpacity={0.95}
+        strokeStyle="rgba(220, 65, 215, 0.75)"
+        longitude={yibin.longitude}
+        latitude={yibin.latitude}
          />
 
         <Timeline class="timeline" handleItem={(item)=>{this.fly2position(this.state.viewport,item)}}/>
@@ -283,93 +240,15 @@ export default class App extends Component {
       </MapGL>
     );
   }
-
 }
 
-var radius = 10, animateTimer = null, pathIndex = 0;
-function preSetCtx(context) {
-  //默认值为source-over
-    var prev = context.globalCompositeOperation;
-    //只显示canvas上原图像的重叠部分
-    context.globalCompositeOperation = 'destination-in';
-    //设置主canvas的绘制透明度
-    context.globalAlpha = 0.95;
-    //这一步目的是将canvas上的图像变的透明
-    context.fillRect(0, 0, context.canvas.width, context.canvas.height);
-    //在原图像上重叠新图像
-    context.globalCompositeOperation = prev;
-}
-function renderCircle(context, point) {
-  //画圆
-    preSetCtx(context);
-    // context.clearRect(0,0,context.canvas.width, context.canvas.height);
-    context.beginPath();
-    context.arc(point[0], point[1], radius, 0, Math.PI * 2);    
-    context.closePath();
-    context.lineWidth = 2; //线条宽度
-    context.strokeStyle = 'rgba(250,250,50, 0.9)'; //颜色
-    context.stroke();
-
-    radius += 0.5; //每一帧半径增加0.5
-    //半径radius大于30时，重置为0
-    if (radius > 20) {
-        radius = 5;
-    }
-}
-
-function renderPath(context, point) {
-  preSetCtx(context);
-  context.save();
-  context.shadowColor = '#fff';
-  context.shadowBlur = 10;
-  context.beginPath();
-  context.arc(point[0], point[1], 4, 0, Math.PI * 2);
-  context.lineWidth = 2; //线条宽度
-  context.fillStyle = 'rgba(131, 235, 235, 0.9)';
-  context.fill();
-  context.closePath();
-  context.restore();
-}
-
-function circleDraw(props) {
-  //  // if viewport changed, clear old interval.
-  // clearInterval(animateTimer);  
-  // animateTimer = window.setInterval(function(){
-  //   renderCircle(props.ctx, props.project([yibin.longitude, yibin.latitude]));
-  // }, 40);  
-}
-
-function overlayerDraw(props) {
-  // purple, 253, 45,215. lightblue 10, 210, 250， yellow: 255,235,59
-  props.ctx.strokeStyle = 'rgba(131, 235, 235, 0.6)';
-  let canvas = props.ctx.canvas;
-  props.ctx.clearRect(0,0,canvas.width, canvas.height);
-  // step equal to total points/ total frames number..
-  let pathlen = coords.coordinates.length, step = parseInt(pathlen/100), firstPoint = true;
-  clearInterval(animateTimer);
-  props.ctx.beginPath();
-  for(let i=0;i<pathlen;i++) {  
-    let coord = coords.coordinates[i];
-    // one thing! there is no pitch/bearing project... only wgs84-> web mercator.
-    let point = props.project([coord.longitude, coord.latitude]);
-    if (firstPoint) {
-      props.ctx.moveTo(point[0], point[1]);
-      firstPoint = false;
-    } else {
-      props.ctx.lineTo(point[0], point[1]);
-    }    
-  }
-  props.ctx.stroke();
-  animateTimer = window.setInterval(function() {
-    renderPath(props.ctx, props.project([
-      coords.coordinates[pathIndex].longitude, coords.coordinates[pathIndex].latitude]));
-    if (pathIndex < (pathlen-step)) {
-      pathIndex += step;
-    } else {
-      pathIndex = 0;
-    }
-    renderCircle(props.ctx, props.project([yibin.longitude, yibin.latitude]));
-  }, 25);
+function drawPath(props) {
+    // setInterval is not recommended !! requestAnimationFrame is better.
+    requestAnimationFrame(drawPath)
+    (function(){
+        // static background path render should not included in requestAnimationFrame.
+        pathLayer.drawPath(props);        
+    })();
 }
 
 // const root = document.createElement('div');

@@ -1,6 +1,7 @@
 import {fromJS} from 'immutable';
 import MAP_STYLE from '../assets/map-style-basic-v8.json';
 
+// export multi object..
 export const polyLayer = fromJS({
   id: 'polyLayer',
   source: 'polyLayer',

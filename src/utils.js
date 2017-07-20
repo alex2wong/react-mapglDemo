@@ -11,18 +11,21 @@ export function pointOnCircle({center, angle, radius}) {
 }
 
 let strategy = {
+  // return single geojson.
   'geojson': function(flatCoords, i) {
     return {
       type: 'Point',
       coordinates: [parseFloat(flatCoords[i*2]), parseFloat(flatCoords[i*2+1])]
     }
   },
+  // return object with lonlat.
   'lonlat': function(flatCoords, i) {
     return {
       'longitude': parseFloat(flatCoords[i*2]),
       'latitude': parseFloat(flatCoords[i*2+1])
     }
   },
+  // flat Array point
   'coords': function(flatCoords, i) {
     return [parseFloat(flatCoords[i*2]), parseFloat(flatCoords[i*2+1])];
   }
