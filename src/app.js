@@ -1,7 +1,7 @@
 /* global window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import MapGL, {StaticMap ,NavigationControl, CanvasOverlay} from 'react-map-gl';
+import MapGL, {StaticMap ,NavigationControl, CanvasOverlay, Marker} from 'react-map-gl';
 
 import ControlPanel from './control-panel';
 import Timeline from './timeline';
@@ -222,7 +222,7 @@ export default class App extends Component {
          <CanvasOverlay 
           {...eventView}
         globalOpacity={0.95}
-        strokeStyle="rgba(220, 65, 215, 0.75)"
+        strokeStyle="rgba(220, 215, 30, 0.75)"
         longitude={yibin.longitude}
         latitude={yibin.latitude}
          />
@@ -237,6 +237,11 @@ export default class App extends Component {
           <NavigationControl onViewportChange={v=>this.setState({viewport: v})} 
              />
           </div>
+
+          <Marker key={1} longitude={eventTable[3].location.longitude} 
+            latitude={eventTable[3].location.latitude}>
+              <div className="icon icon-pikaq"></div>
+            </Marker>
       </MapGL>
     );
   }

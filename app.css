@@ -60,3 +60,13 @@ span {
   left: 60px;
   list-style: none;
 }*/
+.icon {
+    width: 1.8em; height: 1.8em;
+    vertical-align: -0.15em;
+    fill: currentColor;
+    overflow: hidden;
+}
+.icon-pikaq {
+  background: url('./assets/pikaq.png');
+  background-size: contain;
+}
