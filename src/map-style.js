@@ -29,7 +29,7 @@ export const rasterStyle = fromJS({
   "sources": {
         "stamen": {
             // "tiles": ["https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png"],
-            "tiles": ["https://111.231.11.20:3003/proxy/?proxyURI=http://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}"],
+            "tiles": ["https://huangyixiu.co:3003/proxy/?proxyURI=http://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}"],
             // "tiles": ["http://www.google.cn/maps/vt?lyrs=s@702&gl=cn&x={x}&y={y}&z={z}"],
             "type": "raster",
             'tileSize': 256
