@@ -1,7 +1,7 @@
 {
   "name": "react_lib",
   "version": "1.0.0",
-  "description": "React is a JavaScript library for building user interfaces.",
+  "description": "react-mapDemo is a repo include react-mapgl and wedding events.",
   "main": "index.js",
   "directories": {
     "example": "examples"

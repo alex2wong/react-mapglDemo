@@ -1,5 +1,5 @@
 // 全局参数
-var radius = 5, animateTimer = null, pathIndex = 0, requestAnimationFrameID = null;
+var radius = 5, pathIndex = 0, animateTimer = null, requestAnimationFrameID = null;
 window.requestAnimationFrame = window.requestAnimationFrame 
     || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame 
     || window.msRequestAnimationFrame;

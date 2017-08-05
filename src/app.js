@@ -15,6 +15,7 @@ import {json as requestJson}  from 'd3-request';
 import Curve from './curveLine';
 import {PointLayer, PathLayer, drawCircle, renderStaticPath} from './canvasLine';
 import {shanghai, yibin, beijing, chengdu, panshi, eventTable} from './data';
+import TWEEN from 'tween.js';
 
 const token = process.env.MapboxAccessToken; // eslint-disable-line
 // const token = 'pk.eyJ1IjoiaHVhbmd5aXhpdSIsImEiOiI2WjVWR1hFIn0.1P90Q-tkbHS38BvnrhTI6w';
@@ -34,6 +35,12 @@ const navStyle = {
 
 const coords = parseGaode(routes, 'lonlat');
 const rasterStyle2 = Object.assign(defaultMapStyle, rasterStyle);
+// Required by tween.js
+function animate() {
+  TWEEN.update();
+  window.requestAnimationFrame(animate);
+}
+animate();
 
 // React Component named App...
 export default class App extends Component {
@@ -180,7 +187,7 @@ export default class App extends Component {
 
   goPolyLayer(viewport, evt) {
     const newView = Object.assign(viewport, {longitude: -122.4, latitude: 37.8});
-    this.setState({newView});
+    this._easeTo(newView);
     console.warn("viewport changed to USA_SF...");
     console.warn("click evt: " + evt);
     evt.stopPropagation();
@@ -192,12 +199,30 @@ export default class App extends Component {
     console.log("event position for event " + item);
   }
 
+  _easeTo({longitude, latitude}) {
+    // Remove existing animations, from original viewport to new lonlat
+    TWEEN.removeAll();
+    const {viewport} = this.state;
+    new TWEEN.Tween(viewport)
+      .to({
+        longitude, latitude,
+        // zoom: 11
+      }, 1500)
+      .easing(TWEEN.Easing.Cubic.InOut)
+      .onUpdate(() => this._onViewportChange(viewport))
+      .start();
+  };
+
+  _onViewportChange(viewport) {
+    this.setState({viewport});
+  }
+
   // update parent component by passing func to sub component.
   render() {
     // viewport obj is ref to Root.state;
     const {viewport} = this.state;
+    // each timer refer to object to animate ! same with tweenJS    
     var pathLayer = new PathLayer({});
-    var pointLayer = new PointLayer({});
     const canvView = Object.assign({}, viewport, {isDragging:false,redraw:pathLayer.drawPath, coords:coords});
     const eventView = Object.assign({}, viewport, {isDragging:false,redraw:drawCircle});
     const sh2ybLines = Curve.getCurveByPoints(Curve.Point(shanghai.longitude,shanghai.latitude),
@@ -244,7 +269,7 @@ export default class App extends Component {
 
           <Marker key={1} longitude={eventTable[3].location.longitude} 
             latitude={eventTable[3].location.latitude}>
-              <div className="icon icon-pikaq"></div>
+              <div className="icon icon-pikaq" dangerouslySetInnerHTML={{__html: "hilo!!"}}></div>
             </Marker>
       </MapGL>
     );

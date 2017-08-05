@@ -26,7 +26,7 @@ DEMO screenshot: <br>
 #### 准备做的
 - 时间轴和 viewport 的联动，点击事件，地图反馈；点击地图，弹出popup详情.(Inprogress)
 - 将婚礼当天的主要事件列表为时间轴，并可展开详情
-
+- 分析TweenJS，重写一个简单版本的Tween，已经完成[DEMO](https://alex2wong.github.io/react-mapglDemo/examples/tween/) (Done)
 
 ### 拆分重构根组件
 目前App 组件中包含过多职能：
@@ -37,4 +37,4 @@ DEMO screenshot: <br>
 作为通用的canvas 渲染函数，如果没有存储私有数据的要求，完全可以采用接受参数的写法，不用写成Class而担心作用域变动的问题.
 
 - 尽量简化渲染函数的结构
-- 对于requestAnimationFrame, setInterval 等异步注册函数，采用注册回调函数时重定向this的策略.
+- 对于requestAnimationFrame, setInterval 等异步注册函数，采用注册回调函数时重定向this的策略. 对于多图层对象的动画控制，采用类似TweenJS 这样的库来操作
