@@ -13,7 +13,7 @@ import routes from '../assets/chongq2nanxi_coords.json';
 import {fromJS} from 'immutable';
 import {json as requestJson}  from 'd3-request';
 import Curve from './curveLine';
-import {PointLayer, PathLayer, drawCircle} from './canvasLine';
+import {PointLayer, PathLayer, drawCircle, renderStaticPath} from './canvasLine';
 import {shanghai, yibin, beijing, chengdu, panshi, eventTable} from './data';
 
 const token = process.env.MapboxAccessToken; // eslint-disable-line
@@ -200,6 +200,10 @@ export default class App extends Component {
     var pointLayer = new PointLayer({});
     const canvView = Object.assign({}, viewport, {isDragging:false,redraw:pathLayer.drawPath, coords:coords});
     const eventView = Object.assign({}, viewport, {isDragging:false,redraw:drawCircle});
+    const sh2ybLines = Curve.getCurveByPoints(Curve.Point(shanghai.longitude,shanghai.latitude),
+      Curve.Point(yibin.longitude, yibin.latitude));
+      const sh2ybView = Object.assign({}, viewport, {redraw:renderStaticPath})
+      
     return (
       <MapGL
         {...viewport}

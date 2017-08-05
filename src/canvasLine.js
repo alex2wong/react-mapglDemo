@@ -79,7 +79,7 @@ function renderPathPoint(context, point, fillStyle) {
 /**
  * render static path with background canvas..
  */
-function renderStaticPath(context, coords, project, strokeStyle) {
+export function renderStaticPath(context, coords, project, strokeStyle) {
     let pathlen = coords.coordinates.length;        
     context.beginPath();
     context.lineWidth = 4;
