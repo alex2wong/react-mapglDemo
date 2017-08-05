@@ -3,18 +3,18 @@
     <head>
         <meta charset="utf-8" user>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-        <title>Custom Tween Animation</title>
+        <title>Line Animation on Map</title>
         <!-- <script src="https://code.createjs.com/tweenjs-0.6.2.min.js"></script> -->
         <script>
         //  Non-Static Function, namely Class. it should be static Function better..
             var myTween = {
-                fps: 50,
+                fps: 10,
                 objs : null,
                 get : function(models) {
                     this.objs = models;
                     return this;
                 },
-                to : function(targets, duration) {
+                to : function(targets, duration, cb) {
                     this.lastAniParams = [targets, duration];
                     if (targets != undefined && duration != undefined && myTween.objs != null) {
                         var inter = 1000/myTween.fps,
@@ -31,7 +31,7 @@
                                     if (typeof objsCopy[i] != 'object') objsCopy[i] = {};
                                     if (typeof props[i] != 'object') props[i] = {};
                                     objsCopy[i][k] = myTween.objs[i][k];
-                                    props[i][k] = (targets[i][k] - myTween.objs[i][k]) * (1/stepNum); 
+                                    props[i][k] = parseFloat(((targets[i][k] - myTween.objs[i][k]) * (1/stepNum)).toFixed(3)); 
                                 }
                             }
                         }
@@ -66,7 +66,9 @@
                                     // console.log("obj " +  myTween.objs[i]['name'] +' changed,' + key + ": " + myTween.objs[i][key]);
                                 }
                             }
-                            render(myTween.objs);
+                            if (cb && cb instanceof Function) {
+                                cb.call(this, myTween.objs);
+                            }                            
                             stepIndex += 1;
                         }, inter);
                     }
@@ -88,34 +90,96 @@
                     this.loop = !this.loop;
                 },
                 lastAniParams: [undefined, undefined]
-            }
+            }           
+
+        </script>
+        <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.34.0/mapbox-gl.js'></script>
+        <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.34.0/mapbox-gl.css' rel='stylesheet' />
+        <!--<link href='Css/mapbox-gl.css' rel='stylesheet' />-->
+        <style>
+            body { margin:0; padding:0; }
+            #map { position:relative; width:700px; height:400px}
+        </style>
+    </head>
+
+    <body style="width: 100%;height: 100%;">
+        <h4>Test Custom Animation on Mapbox</h4>
+        <input type="button" style="padding: 6px;" 
+            id="pauseAnimation" value="pauseAnimation" onclick="myTween.toggleAni()">
+        <input type="button" style="padding: 6px;" onclick="myTween.toggleLoop()" value="loopAnimation">
+            <br><br>
+        
+        <div style="position:relative;width:100%;height:100%;">
+            <div id='map'></div>
+            <!-- <canvas id="demoCanvas" style="position:absolute;" width="700px" height="400px"></canvas> -->
+        </div>
+        <script type="text/javascript">
+            mapboxgl.accessToken = 'pk.eyJ1IjoiaHVhbmd5aXhpdSIsImEiOiI2WjVWR1hFIn0.1P90Q-tkbHS38BvnrhTI6w';
+            var mapCenter = [118.0066, 30.6135];
+            var map = new mapboxgl.Map({
+                style: 'mapbox://styles/mapbox/dark-v9',
+                center: mapCenter,
+                zoom: 6,
+                pitch: 45,
+                bearing: 0,
+                light: {
+                    'anchor':'viewport',
+                    'color':'white',
+                    'intensity':0.7
+                },
+                container: 'map'
+            });
+
+            // the 'building' layer in the mapbox-streets vector source contains building-height
+            // data from OpenStreetMap.
+            map.on('load', function() {
+                // map.addLayer({
+                //     'id': '3d-buildings',
+                myTween.fps = 40;
+                init();
+            });
+
 
             function init() {
-                var objNum = 200;
+                var objNum = 10, canvasOverlay = null;
+                canvasOverlay = createOverlay();
                 objs = rdObjs(objNum);
                 // myTween.loop = false;
                 targets = rdObjs(objNum);
-                myTween.get(objs).to(targets, 4000);
+                myTween.get(objs).to(targets, 4000, render);
 
             }
 
             // rdObjs with given number
             function rdObjs(num) {
                 var objs = [], index = 0;
+                if (!mapCenter) return objs;
                 for(var i=0;i<num;i++) {
                     objs.push({
                         name: "p" + i.toString(),
-                        lon: parseInt((Math.random()*700).toFixed(2)),
-                        lat: parseInt((Math.random()*380).toFixed(2)),
+                        lon: parseInt(((Math.random()*8)+mapCenter[0]-4).toFixed(2)),
+                        lat: parseInt(((Math.random()*4)+mapCenter[1]-2).toFixed(2)),
                         color: 'rgba(10,200,'+ (Math.random()*251).toFixed(0) +',0.7)',
                     });
                 }
-                return objs
+                return objs;
+            }
+
+            function createOverlay() {
+                var canvasContainer = document.querySelector(".mapboxgl-canvas-container"),
+                    mapboxCanvas = document.querySelector(".mapboxgl-canvas");
+                    canvasOverlay = document.createElement("canvas");
+                    canvasOverlay.style.position = "absolute";
+                    canvasOverlay.className = "overlay-canvas";
+                    canvasOverlay.width = parseInt(mapboxCanvas.style.width);
+                    canvasOverlay.height = parseInt(mapboxCanvas.style.height);
+                    canvasContainer.appendChild(canvasOverlay);
+                return canvasOverlay;
             }
 
             function render(objs) {
-                var canv = document.querySelector("#demoCanvas"),
-                    ctx = canv.getContext("2d");
+                if (canvasOverlay) {
+                    ctx = canvasOverlay.getContext("2d");
                     // ctx.clearRect(0,0,canv.width, canv.height);
                     _preSetCtx(ctx);
                     ctx.save();
@@ -124,15 +188,28 @@
                     ctx.shadowBlur = 4;
                     ctx.shadowColor = "rgba(255,255,255,.4)";
                     for(var i=0;i<objs.length;i++) {
-                        var x = objs[i]['lon'],
-                            y = objs[i]['lat'];
+                        var x = objs[i]['lon'], y = objs[i]['lat'],
+                            pix = trans2pix(x, y);
+                        if (pix == null) continue;
                         ctx.fillStyle = objs[i]['color'];
                         ctx.beginPath();
-                        ctx.arc(x, y, 2, 0, Math.PI*2);
+                        ctx.arc(pix[0], pix[1], 2, 0, Math.PI*2);
                         ctx.fill();
                         ctx.closePath();
                     }
                     ctx.restore()
+                }
+            }
+
+            function trans2pix(lng, lat) {
+                if (map != undefined && map.project instanceof Function) {
+                    var lnglat = map.project(new mapboxgl.LngLat(
+                        lng, lat));
+                    var x = lnglat.x;
+                    var y = lnglat.y;
+                    return [x, y];
+                }
+                return null;
             }
 
             function _preSetCtx(context) {
@@ -143,24 +220,11 @@
                 //设置主canvas的绘制透明度
                 context.globalAlpha = 0.95;
                 //这一步目的是将canvas上的图像变的透明
+                // context.fillStyle = "rgba(0,0,0,.95)";
                 context.fillRect(0, 0, context.canvas.width, context.canvas.height);
                 //在原图像上重叠新图像
                 context.globalCompositeOperation = prev;
             }
-
         </script>
-    </head>
-    <body onload="init();" style="width: 100%;height: 100%;">
-        <h4>Custom Tween Animation.</h4>
-        <p>Build Animation Controller with less than 100-line code</p>
-        <p>use: myTween.get(objs) to set objs which are going to animate.</p>
-        <p>myTween.to(targets, duration) to make animation, targets include props to change and its destination value.</p>
-        <input type="button" style="padding: 6px;" 
-            id="pauseAnimation" value="pauseAnimation" onclick="myTween.toggleAni()">
-        <input type="button" style="padding: 6px;" onclick="myTween.toggleLoop()" value="loopAnimation">
-            <br><br>
-        <div style="width: 100%;height: 100%;">
-            <canvas id="demoCanvas" style="background-color: #222" width="720px" height="400px"></canvas>
-        </div>
     </body>
 </html>

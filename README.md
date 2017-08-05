@@ -20,6 +20,7 @@ During the process, some usefull modules or components would be dev for react-ma
 
 - 关于参加wedding ceremony的宾客来源动画展示，利用map-gl的canvasOverlay叠加层渲染，
 - 需要用到2dContext的一些配置，shadowColor，shadowBlur等, 达到轨迹点发光的效果 (Done)
+
 DEMO screenshot: <br>
 ![DEMO screenshot:](https://raw.githubusercontent.com/alex2wong/react-mapglDemo/master/assets/demoScreen.gif.gif)
 
@@ -27,6 +28,10 @@ DEMO screenshot: <br>
 - 时间轴和 viewport 的联动，点击事件，地图反馈；点击地图，弹出popup详情.(Inprogress)
 - 将婚礼当天的主要事件列表为时间轴，并可展开详情
 - 分析TweenJS，重写一个简单版本的Tween，已经完成[DEMO](https://alex2wong.github.io/react-mapglDemo/examples/tween/) (Done)
+
+Tween CanvasOverlay in Mapbox: <br>
+![screenshot:](https://raw.githubusercontent.com/alex2wong/react-mapglDemo/master/assets/canvasOverlay.gif)
+
 
 ### 拆分重构根组件
 目前App 组件中包含过多职能：
