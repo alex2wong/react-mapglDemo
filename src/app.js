@@ -17,6 +17,9 @@ import {PointLayer, PathLayer, drawCircle, renderStaticPath} from './canvasLine'
 import {shanghai, yibin, beijing, chengdu, panshi, eventTable} from './data';
 import TWEEN from 'tween.js';
 
+import {myTween, testTween} from './tween';
+import {myCanvasOverlay, render as renderCb} from './overlayer/canvasOverlay';
+
 const token = process.env.MapboxAccessToken; // eslint-disable-line
 // const token = 'pk.eyJ1IjoiaHVhbmd5aXhpdSIsImEiOiI2WjVWR1hFIn0.1P90Q-tkbHS38BvnrhTI6w';
 
@@ -25,6 +28,7 @@ if (!token) {
 }
 
 const darkStyle = "mapbox://styles/mapbox/dark-v9";
+const mapCenter = [yibin.longitude, yibin.latitude];
 
 const navStyle = {
   position: 'absolute',
@@ -227,7 +231,13 @@ export default class App extends Component {
     const eventView = Object.assign({}, viewport, {isDragging:false,redraw:drawCircle});
     const sh2ybLines = Curve.getCurveByPoints(Curve.Point(shanghai.longitude,shanghai.latitude),
       Curve.Point(yibin.longitude, yibin.latitude));
-      const sh2ybView = Object.assign({}, viewport, {redraw:renderStaticPath})
+      const sh2ybView = Object.assign({}, viewport, {redraw:renderStaticPath});
+    
+    // test myCanvasOverlay and myTween animation.
+    setTimeout(() => {
+      var myOverlay = new myCanvasOverlay(this.state.viewport);
+      testTween(mapCenter, renderCb);
+    }, 100);    
       
     return (
       <MapGL
